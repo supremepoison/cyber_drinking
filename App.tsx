@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { GameState, PlayerStats, Scenario, GameEvent, GameEventChoice, LogEntry, StatType, InventoryItem, ShopItemContent, Badge } from './types';
-import { generateEvent } from './services/geminiService';
+import { generateEvent } from './services/eventService';
 import { MAX_STATS, MIN_STATS, WIN_TURN, FIXED_SCENARIO, TRANSLATIONS, STAGE_LENGTH, STAGES, COVER_IMAGE_URL, BADGES } from './constants';
 import { getEndingTitle } from './endingTitles';
 import { getFailureEnding, FailureType } from './failureEndings';
@@ -41,7 +41,6 @@ const App: React.FC = () => {
   const [currentEventId, setCurrentEventId] = useState<string>('t1_seating');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isApiReady, setIsApiReady] = useState(false);
   const [endingStory, setEndingStory] = useState<string>('');
   const [earnedBadges, setEarnedBadges] = useState<Badge[]>([]);
   const [hasVintageWineDebuff, setHasVintageWineDebuff] = useState(false); // 茅台 debuff：后续伤害加倍
@@ -50,13 +49,6 @@ const App: React.FC = () => {
 
   const t = TRANSLATIONS[lang];
   const currentStage = getStage(turn);
-
-  // Check API Key - 如果 API key 已写死在代码中，直接设置为 ready
-  useEffect(() => {
-    // 如果 API key 在代码中写死，直接设置为 ready
-    // 否则检查环境变量
-      setIsApiReady(true);
-  }, []);
 
   const initGame = useCallback(async () => {
     const scenario = FIXED_SCENARIO;
@@ -381,14 +373,6 @@ const App: React.FC = () => {
     setHasVintageWineDebuff(false); // 重置茅台 debuff
     setFailureType(null); // 重置失败类型
   };
-
-  if (!isApiReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-black">
-        <p className="text-red-500 font-bold">ERROR: API_KEY MISSING</p>
-      </div>
-    );
-  }
 
   // Determine Background
   let activeBg = COVER_IMAGE_URL;
